@@ -42,26 +42,6 @@ BUILD_GECOS ?= $(shell grep '^${LOGNAME}:' /etc/passwd | cut -d: -f5 | cut -d, -
 BUILD_GID ?= $(shell grep '^${LOGNAME}:' /etc/passwd | cut -d: -f4)
 BUILD_GNAME ?= $(shell getent group ${BUILD_GID} | cut -d: -f1)
 
-define GET_SLUG
-	percent_encode() {
-		local s="$$1" c ;
-		while [[ -n "$$s" ]]; do
-			c="$${s:0:1}" ;
-			if [[ "$$c" =~ [a-zA-Z0-9_/] ]]; then
-				printf '%s' "$$c" ;
-			else
-				printf '%%%02X' "'$$c" ;
-			fi ;
-			s="$${s:1}" ;
-		done
-		} ;
-
-	encoded="$$(percent_encode "${CURDIR}" | tr '/' '-')" ;
-	echo "$$encoded"
-endef
-
-PROJECT_SLUG := ${shell ${GET_SLUG}}
-
 build:	Dockerfile
 	cd $(dir Dockerfile)
 	docker build \
@@ -76,31 +56,35 @@ build:	Dockerfile
 		-f Dockerfile \
 		.
 
-BUILD_CONTAINER_CONTEXT := ${HOME}/.config/claude-container/${PROJECT_SLUG}
-$(info BUILD_CONTAINER_CONTEXT=${BUILD_CONTAINER_CONTEXT})
+PROJECT_CONTEXT := ${CURDIR}/.context
+$(info PROJECT_CONTEXT=${PROJECT_CONTEXT})
 
 PROJECT_WORKSPACE :=	${CURDIR}/workspace
 
 PROJECT_MOUNTS :=	\
 		--mount type=bind,source=${PROJECT_WORKSPACE},target=/workspace \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.claude:/home/${BUILD_UNAME}/.claude" \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.bashrc:/home/${BUILD_UNAME}/.bashrc:ro" \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
+		--volume "${PROJECT_CONTEXT}/.claude:/home/${BUILD_UNAME}/.claude" \
+		--volume "${PROJECT_CONTEXT}/.bashrc:/home/${BUILD_UNAME}/.bashrc:ro" \
+		--volume "${PROJECT_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
 		--volume "${CURDIR}/init-firewall-extra.txt:/usr/local/etc/init-firewall-extra.txt:ro" \
 # end PROJECT_MOUNTS
 
+# if we don't set up the files that we're mounting in, Docker will
+# create a directory. And if we don't create .claude in the
+# context, the created directory will have the wrong permissions.
 run-setup:
-	@mkdir -p "${BUILD_CONTAINER_CONTEXT}"
+	@mkdir -p "${PROJECT_CONTEXT}"
 	@mkdir -p "${PROJECT_WORKSPACE}"
-	@if [[ ! -f "${BUILD_CONTAINER_CONTEXT}/.bashrc" ]] && \
+	@mkdir -p "${PROJECT_CONTEXT}/.claude"
+	@if [[ ! -f "${PROJECT_CONTEXT}/.bashrc" ]] && \
 	    [[ -f "${HOME}/.bashrc" ]]; then \
 			printf "\n" "initalize .bashrc" && \
-			cp "${HOME}/.bashrc" "${BUILD_CONTAINER_CONTEXT}/.bashrc" ; \
+			cp "${HOME}/.bashrc" "${PROJECT_CONTEXT}/.bashrc" ; \
 	fi
-	@if [[ ! -f "${BUILD_CONTAINER_CONTEXT}/.bash_aliases" ]] && \
+	@if [[ ! -f "${PROJECT_CONTEXT}/.bash_aliases" ]] && \
 	    [[ -f "${HOME}/.bash_aliases" ]] ; then \
 		printf "\n" "initalize .bash_aliases" && \
-		cp "${HOME}/.bash_aliases" "${BUILD_CONTAINER_CONTEXT}/.bash_aliases" ; \
+		cp "${HOME}/.bash_aliases" "${PROJECT_CONTEXT}/.bash_aliases" ; \
 	fi
 	@if [[ ! -f "${CURDIR}/init-firewall-extra.txt" ]] ; then \
 		printf "\n" "initalize empty init-firewall-extra.txt" && \
@@ -148,3 +132,5 @@ push:
 	git tag -a -m "Image ${MCCI_CLAUDE_UBUNTU_TAG}:${MCCI_CLAUDE_UBUNTU_VERSION}" "${MCCI_CLAUDE_UBUNTU_VERSION}"
 	docker push ${MCCI_CLAUDE_UBUNTU_TAG}:latest
 	docker push ${MCCI_CLAUDE_UBUNTU_TAG}:${MCCI_CLAUDE_UBUNTU_VERSION}
+
+#### end of file ####
