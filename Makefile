@@ -66,6 +66,8 @@ PROJECT_MOUNTS :=	\
 		--volume "${PROJECT_CONTEXT}/.claude:/home/${BUILD_UNAME}/.claude" \
 		--volume "${PROJECT_CONTEXT}/.bashrc:/home/${BUILD_UNAME}/.bashrc:ro" \
 		--volume "${PROJECT_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
+		--volume "${PROJECT_CONTEXT}/.bash_history:/home/${BUILD_UNAME}/.bash_history" \
+		--volume "${PROJECT_CONTEXT}/.claude.json:/home/${BUILD_UNAME}/.claude.json" \
 		--volume "${CURDIR}/init-firewall-extra.txt:/usr/local/etc/init-firewall-extra.txt:ro" \
 # end PROJECT_MOUNTS
 
@@ -85,6 +87,14 @@ run-setup:
 	    [[ -f "${HOME}/.bash_aliases" ]] ; then \
 		printf "\n" "initalize .bash_aliases" && \
 		cp "${HOME}/.bash_aliases" "${PROJECT_CONTEXT}/.bash_aliases" ; \
+	fi
+	@if [[ ! -f "${PROJECT_CONTEXT}/.bash_history" ]] ; then \
+		printf "\n" "initalize empty .bash_history" && \
+		touch "${PROJECT_CONTEXT}/.bash_history" ; \
+	fi
+	@if [[ ! -f "${PROJECT_CONTEXT}/.claude.json" ]] ; then \
+		printf "\n" "initalize empty .claude.json" && \
+		touch "${PROJECT_CONTEXT}/.claude.json" ; \
 	fi
 	@if [[ ! -f "${CURDIR}/init-firewall-extra.txt" ]] ; then \
 		printf "\n" "initalize empty init-firewall-extra.txt" && \
