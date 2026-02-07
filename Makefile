@@ -76,10 +76,22 @@ build:	Dockerfile
 		-f Dockerfile \
 		.
 
-BUILD_CONTAINER_CONTEXT = ${HOME}/.config/claude-container/${PROJECT_SLUG}
+BUILD_CONTAINER_CONTEXT := ${HOME}/.config/claude-container/${PROJECT_SLUG}
+$(info BUILD_CONTAINER_CONTEXT=${BUILD_CONTAINER_CONTEXT})
+
+PROJECT_WORKSPACE :=	${CURDIR}/workspace
+
+PROJECT_MOUNTS :=	\
+		--mount type=bind,source=${PROJECT_WORKSPACE},target=/workspace \
+		--volume "${BUILD_CONTAINER_CONTEXT}/.claude:/home/${BUILD_UNAME}/.claude" \
+		--volume "${BUILD_CONTAINER_CONTEXT}/.bashrc:/home/${BUILD_UNAME}/.bashrc:ro" \
+		--volume "${BUILD_CONTAINER_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
+		--volume "${CURDIR}/init-firewall-extra.txt:/usr/local/etc/init-firewall-extra.txt:ro" \
+# end PROJECT_MOUNTS
 
 run-setup:
 	@mkdir -p "${BUILD_CONTAINER_CONTEXT}"
+	@mkdir -p "${PROJECT_WORKSPACE}"
 	@if [[ ! -f "${BUILD_CONTAINER_CONTEXT}/.bashrc" ]] && \
 	    [[ -f "${HOME}/.bashrc" ]]; then \
 			printf "\n" "initalize .bashrc" && \
@@ -90,15 +102,16 @@ run-setup:
 		printf "\n" "initalize .bash_aliases" && \
 		cp "${HOME}/.bash_aliases" "${BUILD_CONTAINER_CONTEXT}/.bash_aliases" ; \
 	fi
+	@if [[ ! -f "${CURDIR}/init-firewall-extra.txt" ]] ; then \
+		printf "\n" "initalize empty init-firewall-extra.txt" && \
+		touch "${CURDIR}/init-firewall-extra.txt" ; \
+	fi
 
 run:	run-setup
 	docker run -it --rm \
 		--cap-add=NET_ADMIN \
 		--cap-add=NET_RAW \
-		--mount type=bind,source=${realpath .},target=/workspace \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.claude:/home/${BUILD_UNAME}/.claude" \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.bashrc:/home/${BUILD_UNAME}/.bashrc:ro" \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
+		${PROJECT_MOUNTS} \
 		--memory-swap=-1 \
 		--ulimit core=-1 \
 		${MCCI_CLAUDE_UBUNTU_TAG} \
@@ -106,11 +119,10 @@ run:	run-setup
 
 run-ssh: run-setup
 	docker run -it --rm \
+		--cap-add=NET_ADMIN \
+		--cap-add=NET_RAW \
 		--volume ${SSH_AUTH_SOCK}:/ssh_agent --env SSH_AUTH_SOCK=/ssh_agent \
-		--mount type=bind,source=${realpath .},target=/workspace,consistency=delegated \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.claude:/home/${BUILD_UNAME}/.claude:consistency=delegated" \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.bashrc:/home/${BUILD_UNAME}/.bashrc:ro" \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
+		${PROJECT_MOUNTS} \
 		--memory-swap=-1 \
 		--ulimit core=-1 \
 		${MCCI_CLAUDE_UBUNTU_TAG} \
@@ -119,10 +131,7 @@ run-ssh: run-setup
 run-ssh-nofw: run-setup
 	docker run -it --rm \
 		--volume ${SSH_AUTH_SOCK}:/ssh_agent --env SSH_AUTH_SOCK=/ssh_agent \
-		--mount type=bind,source=${realpath .},target=/workspace,consistency=delegated \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.claude:/home/${BUILD_UNAME}/.claude:consistency=delegated" \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.bashrc:/home/${BUILD_UNAME}/.bashrc:ro" \
-		--volume "${BUILD_CONTAINER_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
+		${PROJECT_MOUNTS} \
 		--memory-swap=-1 \
 		--ulimit core=-1 \
 		${MCCI_CLAUDE_UBUNTU_TAG} \

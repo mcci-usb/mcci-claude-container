@@ -63,8 +63,7 @@ while read -r cidr; do
     ipset add allowed-domains "$cidr"
 done < <(echo "$gh_ranges" | jq -r '(.web + .api + .git)[]' | aggregate -q)
 
-# Resolve and add other allowed domains
-for domain in \
+DOMAINS=(
     "registry.npmjs.org" \
     "api.anthropic.com" \
     "sentry.io" \
@@ -72,7 +71,22 @@ for domain in \
     "statsig.com" \
     "marketplace.visualstudio.com" \
     "vscode.blob.core.windows.net" \
-    "update.code.visualstudio.com"; do
+    "update.code.visualstudio.com"
+    )
+
+EXTRA_DOMAIN_FILE=/usr/local/etc/init-firewall-extra.txt
+if [[ -f "${EXTRA_DOMAIN_FILE}" ]]; then
+    echo "Adding domains from ${EXTRA_DOMAIN_FILE}"
+    while IFS='' read -r line; do
+        echo "Add $line}"
+        DOMAINS+=("$line")
+    done <"${EXTRA_DOMAIN_FILE}"
+else
+    echo "could not read ${EXTRA_DOMAIN_FILE}"
+fi
+
+# Resolve and add other allowed domains
+for domain in "${DOMAINS[@]}" ; do
     echo "Resolving $domain..."
     ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
     if [ -z "$ips" ]; then
