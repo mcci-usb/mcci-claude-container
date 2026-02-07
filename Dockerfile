@@ -3,10 +3,10 @@
 # Module: Dockerfile
 #
 # Function:
-#   Specify docker image contents for MCCI CI Integration on Ubuntu.
+#   Specify docker image contents for MCCI Claude Code work on Ubuntu.
 #
 # Version:
-#   V0.1.1  Fri Jul 28 2023 18:42:18  tmm   Edit level 2
+#   V0.1.0  Wed Feb 04 2026 23:10:08  tmm   Edit level 1
 #
 # Copyright notice:
 #   This file copyright (C) 2022-2023 by:
@@ -21,25 +21,21 @@
 #   or copied without the prior permission of MCCI Corporation.
 #
 # Author:
-#   Terry Moore, MCCI Corporation   December 2022
+#   Terry Moore, MCCI Corporation   February 2026
 #
 # Revision History:
-#   0.1.0  Sat Dec 31 2022 17:13:37  tmm
-#       Add MCCI module header
-#
-#   0.1.1  Fri Jul 28 2023 18:42:18  tmm
-#	Make cross compiles work properly; and fix sudo.
+#   0.1.0  Wed Feb 04 2026 23:10:08  tmm
+#	    Module created.
 #
 ##############################################################################
 
 #
-# By default, we build on Ubuntu 16.04 to ensure compatibility
-# with older customer environments. This can be overridden when building
+# By default, we build on Ubuntu 24.04. This can be overridden when building
 # if needed.
 #
-ARG UBUNTU_VERSION=16.04
+ARG UBUNTU_VERSION=24.04
 FROM ubuntu:${UBUNTU_VERSION}
-LABEL Description="MCCI build environment"
+LABEL Description="MCCI Claude Code environment"
 
 ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -53,12 +49,26 @@ RUN apt-get -y --no-install-recommends install \
     curl \
     git \
     openssh-client \
-    ksh byacc sharutils cvs zip ghostscript groff bsdmainutils \
-    sudo
+    sudo \
+    iptables \
+    ipset \
+    jq \
+    dnsutils \
+    aggregate \
+    iproute2
 
-RUN apt-get -y --no-install-recommends install \
-    build-essential \
-    gcc-multilib
+#RUN apt-get -y --no-install-recommends install \
+#    build-essential \
+#    gcc-multilib
+
+# set up node.js 20 (as root)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+RUN apt-get install -y nodejs
+
+# Copy the firewall script
+COPY init-firewall.sh /usr/local/bin/init-firewall.sh
+COPY read-bashrc-init-firewall.sh /usr/local/bin/read-bashrc-init-firewall.sh
+RUN chmod +x /usr/local/bin/init-firewall.sh /usr/local/bin/read-bashrc-init-firewall.sh
 
 # set up user ids; normally overriden
 ARG USER_ID=1000
@@ -81,21 +91,20 @@ RUN printf '%s ALL=(ALL:ALL) NOPASSWD: ALL\n' ${USER_NAME} >> /etc/sudoers
 # switch to the created user
 WORKDIR /home/${USER_NAME}
 
-# copy and run the install script
-## COPY openvino/install_build_dependencies.sh .
-## RUN bash install_build_dependencies.sh
-
 # set up the user env.
 USER ${USER_NAME}
-ENV HOME /home/${USER_NAME}
-ENV PATH "$PATH:/home/tools/bin"
+ENV HOME=/home/${USER_NAME}
+ENV PATH="$PATH:/home/${USER_NAME}/.local/bin"
 
 # set up ssh
-RUN mkdir -m 700 .ssh&& \
+RUN mkdir -m 700 .ssh && \
     printf "StrictHostKeyChecking no\n" > .ssh/config
 
 # configure git, just in case.
 RUN git config --global user.email "$USER_NAME@mcci.com" && \
     git config --global user.name "$USER_GECOS"
+
+# install claude
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 ### end of file ###
