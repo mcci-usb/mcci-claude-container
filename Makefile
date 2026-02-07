@@ -63,6 +63,7 @@ PROJECT_WORKSPACE :=	${CURDIR}/workspace
 
 PROJECT_MOUNTS :=	\
 		--mount type=bind,source=${PROJECT_WORKSPACE},target=/workspace \
+		--volume "${PROJECT_CONTEXT}/.cache:/home/${BUILD_UNAME}/.cache" \
 		--volume "${PROJECT_CONTEXT}/.claude:/home/${BUILD_UNAME}/.claude" \
 		--volume "${PROJECT_CONTEXT}/.bashrc:/home/${BUILD_UNAME}/.bashrc:ro" \
 		--volume "${PROJECT_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
@@ -75,7 +76,7 @@ PROJECT_MOUNTS :=	\
 run-setup:
 	@mkdir -p "${PROJECT_CONTEXT}"
 	@mkdir -p "${PROJECT_WORKSPACE}"
-	@mkdir -p "${PROJECT_CONTEXT}/.claude"
+	@mkdir -p "${PROJECT_CONTEXT}/.claude" "${PROJECT_CONTEXT}/.cache"
 	@if [[ ! -f "${PROJECT_CONTEXT}/.bashrc" ]] && \
 	    [[ -f "${HOME}/.bashrc" ]]; then \
 			printf "\n" "initalize .bashrc" && \
