@@ -57,7 +57,6 @@ build:	Dockerfile
 		.
 
 PROJECT_CONTEXT := ${CURDIR}/.context
-$(info PROJECT_CONTEXT=${PROJECT_CONTEXT})
 
 PROJECT_WORKSPACE :=	${CURDIR}/workspace
 
