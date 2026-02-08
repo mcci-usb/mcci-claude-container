@@ -181,7 +181,12 @@ Edit the `Dockerfile` to change the NodeSource setup URL.
 
 ## License and Acknowledgements
 
-Written by Terry Moore, MCCI Corporation, by referring to the standing Anthropic container [claude-code](https://github.com/anthropics/claude-code). In particular, `.dev-container/init-firewall.sh` was used substantially as the starting point for this repo's `init-firewall.sh`, so that file should be viewed as governed by the claude-code LICENSE.md.
+Written by Terry Moore, MCCI Corporation, by referring to the standing Anthropic container [claude-code](https://github.com/anthropics/claude-code).
+
+This repository contains code under two licenses:
+
+- **`init-firewall.sh`** — derived from Anthropic's [claude-code](https://github.com/anthropics/claude-code) and subject to the Business Source License. See [LICENSE-init-firewall.md](LICENSE-init-firewall.md).
+- **All other files** — copyright © 2026 MCCI Corporation, released under the MIT License. See [LICENSE.md](LICENSE.md).
 
 This README was prepared with help of Claude, and I used Claude for code review and debugging advice.
 

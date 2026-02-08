@@ -3,22 +3,19 @@
 # Module: Dockerfile
 #
 # Function:
-#   Specify docker image contents for MCCI Claude Code work on Ubuntu.
+#   Specify docker image contents for Claude Code work in a container.
 #
 # Version:
 #   V0.1.0  Wed Feb 04 2026 23:10:08  tmm   Edit level 1
 #
 # Copyright notice:
-#   This file copyright (C) 2022-2023 by:
+#   This file copyright (C) 2026 by:
 #
 #       MCCI Corporation
 #       3520 Krums Corners Rd
 #       Ithaca, NY  14850
 #
-#   An unpublished work; all right reserved.
-#
-#   This file is proprietary information, and may not be disclosed
-#   or copied without the prior permission of MCCI Corporation.
+#   See LICENSE.md for license information.
 #
 # Author:
 #   Terry Moore, MCCI Corporation   February 2026
