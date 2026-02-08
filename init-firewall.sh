@@ -78,7 +78,7 @@ EXTRA_DOMAIN_FILE=/usr/local/etc/init-firewall-extra.txt
 if [[ -f "${EXTRA_DOMAIN_FILE}" ]]; then
     echo "Adding domains from ${EXTRA_DOMAIN_FILE}"
     while IFS='' read -r line; do
-        echo "Add $line}"
+        echo "Add $line"
         DOMAINS+=("$line")
     done <"${EXTRA_DOMAIN_FILE}"
 else
