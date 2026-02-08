@@ -1,4 +1,4 @@
-# mcci-claude-ubuntu
+# mcci-claude-container
 
 A lightweight Docker container for running Claude Code with network firewall isolation. This provides the security benefits of Anthropic's devcontainer approach without the VS Code coupling or heavyweight tooling.
 
@@ -24,7 +24,7 @@ The firewall isolation is what allows you to safely run `claude --dangerously-sk
 ### 1. Build the container (once per user)
 
 ```bash
-cd /path/to/mcci-claude-ubuntu
+cd /path/to/mcci-claude-container
 make build
 ```
 
@@ -51,7 +51,7 @@ my-project/
 
 ```bash
 cd /path/to/my-project
-make -f /path/to/mcci-claude-ubuntu/Makefile run
+make -f /path/to/mcci-claude-container/Makefile run
 ```
 
 On first run:
@@ -70,7 +70,7 @@ Subsequent runs pick up your saved credentials and settings.
 | `make run` | Run Claude in the container with firewall |
 | `make run-ssh` | Run with SSH agent forwarding (for git over SSH) |
 | `make run-ssh-nofw` | Run with SSH agent but no firewall (debugging) |
-| `make push` | Push image to MCCI GitLab registry |
+| `make push` | Push image to a container registry (requires setting `MCCI_CLAUDE_CONTAINER_REPO`) |
 
 ## Adding Custom Domains
 
@@ -179,8 +179,10 @@ Edit the `Dockerfile` to add packages in the `apt-get install` section.
 
 Edit the `Dockerfile` to change the NodeSource setup URL.
 
-## License
+## License and Acknowledgements
 
-Written by Terry Moore, MCCI Corporation, by referring to the standing Anthropic container [claude-code](https://github.com/anthropics/claude-code). In particular, `.dev-container/init-firewall.sh` was used substantially as the starting point foror this repo's `init-firewall.sh`.and so that file should be viewed as governed by the claude-code LICENSE.md.
+Written by Terry Moore, MCCI Corporation, by referring to the standing Anthropic container [claude-code](https://github.com/anthropics/claude-code). In particular, `.dev-container/init-firewall.sh` was used substantially as the starting point for this repo's `init-firewall.sh`, so that file should be viewed as governed by the claude-code LICENSE.md.
+
+This README was prepared with help of Claude, and I used Claude for code review and debugging advice.
 
 Copyright © 2026 MCCI Corporation. See LICENSE.md file.

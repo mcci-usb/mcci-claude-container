@@ -15,24 +15,25 @@
 #       3520 Krums Corners Rd
 #       Ithaca, NY  14850
 #
-#   An unpublished work; all right reserved.
-#
-#   This file is proprietary information, and may not be disclosed
-#   or copied without the prior permission of MCCI Corporation.
+#   See LICENSE.md for license information.
 #
 # Author:
-#   Terry Moore, MCCI Corporation   December 2022
+#   Terry Moore, MCCI Corporation   February 2026
 #
 # Revision History:
 #   0.1.0  Wed Feb 04 2026 23:10:08  tmm
-#       Add MCCI module header
+#       Module created.
 #
 ##############################################################################
 
 SHELL := /bin/bash
 
-MCCI_CLAUDE_UBUNTU_TAG=gitlab-x.mcci.com:10001/mcci/tools/containers/mcci-claude-ubuntu
-MCCI_CLAUDE_UBUNTU_VERSION=v0.1.0
+MCCI_CLAUDE_CONTAINER_VERSION=v0.1.0
+MCCI_CLAUDE_CONTAINER_LOCAL_TAG=mcci-claude-container
+
+# For pushing, require explicit repo (no default)
+# MCCI_CLAUDE_CONTAINER_REPO must be set to push, e.g.:
+#   make push MCCI_CLAUDE_CONTAINER_REPO=ghcr.io/mcci-usb/mcci-claude-container
 
 # defaults
 BUILD_UNAME ?= ${LOGNAME}
@@ -45,9 +46,10 @@ BUILD_GNAME ?= $(shell getent group ${BUILD_GID} | cut -d: -f1)
 build:	Dockerfile
 	cd $(dir Dockerfile)
 	docker build \
-		-t ${MCCI_CLAUDE_UBUNTU_TAG}:latest \
-		-t ${MCCI_CLAUDE_UBUNTU_TAG}:${MCCI_CLAUDE_UBUNTU_VERSION} \
-		-t mcci-claude-ubuntu \
+		-t ${MCCI_CLAUDE_CONTAINER_LOCAL_TAG}:latest \
+		-t ${MCCI_CLAUDE_CONTAINER_LOCAL_TAG}:${MCCI_CLAUDE_CONTAINER_VERSION} \
+		$(if ${MCCI_CLAUDE_CONTAINER_REPO},-t ${MCCI_CLAUDE_CONTAINER_REPO}:latest) \
+		$(if ${MCCI_CLAUDE_CONTAINER_REPO},-t ${MCCI_CLAUDE_CONTAINER_REPO}:${MCCI_CLAUDE_CONTAINER_VERSION}) \
 		--build-arg USER_ID=${BUILD_UID} \
 		--build-arg USER_NAME=${BUILD_UNAME} \
 		--build-arg GROUP_ID=${BUILD_GID} \
@@ -108,7 +110,7 @@ run:	run-setup
 		${PROJECT_MOUNTS} \
 		--memory-swap=-1 \
 		--ulimit core=-1 \
-		${MCCI_CLAUDE_UBUNTU_TAG} \
+		${MCCI_CLAUDE_CONTAINER_LOCAL_TAG} \
 		bash --init-file /usr/local/bin/read-bashrc-init-firewall.sh
 
 run-ssh: run-setup
@@ -119,7 +121,7 @@ run-ssh: run-setup
 		${PROJECT_MOUNTS} \
 		--memory-swap=-1 \
 		--ulimit core=-1 \
-		${MCCI_CLAUDE_UBUNTU_TAG} \
+		${MCCI_CLAUDE_CONTAINER_LOCAL_TAG} \
 		bash --init-file /usr/local/bin/read-bashrc-init-firewall.sh
 
 run-ssh-nofw: run-setup
@@ -128,19 +130,24 @@ run-ssh-nofw: run-setup
 		${PROJECT_MOUNTS} \
 		--memory-swap=-1 \
 		--ulimit core=-1 \
-		${MCCI_CLAUDE_UBUNTU_TAG} \
+		${MCCI_CLAUDE_CONTAINER_LOCAL_TAG} \
 		bash
 
 push:
-	@bash -c 'if [[ "${MCCI_CLAUDE_UBUNTU_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-,*|)$$ ]]; then \
+	@if [ -z "${MCCI_CLAUDE_CONTAINER_REPO}" ]; then \
+		echo "ERROR: you must set MCCI_CLAUDE_CONTAINER_REPO before pushing"; \
+		echo "  e.g.: make push MCCI_CLAUDE_CONTAINER_REPO=ghcr.io/mcci-usb/mcci-claude-container"; \
+		exit 1; \
+	fi
+	@bash -c 'if [[ "${MCCI_CLAUDE_CONTAINER_VERSION}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-.+)?$$ ]]; then \
 		true; \
 	else \
-		echo "MCCI_CLAUDE_UBUNTU_VERSION must be of form v#.#.# or v#.#.#-pre#" ; \
+		echo "MCCI_CLAUDE_CONTAINER_VERSION must be of form v#.#.# or v#.#.#-pre#" ; \
 		false; \
 	fi'
 	# tag before pushing to catch redundant operation
-	git tag -a -m "Image ${MCCI_CLAUDE_UBUNTU_TAG}:${MCCI_CLAUDE_UBUNTU_VERSION}" "${MCCI_CLAUDE_UBUNTU_VERSION}"
-	docker push ${MCCI_CLAUDE_UBUNTU_TAG}:latest
-	docker push ${MCCI_CLAUDE_UBUNTU_TAG}:${MCCI_CLAUDE_UBUNTU_VERSION}
+	git tag -a -m "Image ${MCCI_CLAUDE_CONTAINER_REPO}:${MCCI_CLAUDE_CONTAINER_VERSION}" "${MCCI_CLAUDE_CONTAINER_VERSION}"
+	docker push ${MCCI_CLAUDE_CONTAINER_REPO}:latest
+	docker push ${MCCI_CLAUDE_CONTAINER_REPO}:${MCCI_CLAUDE_CONTAINER_VERSION}
 
 #### end of file ####
