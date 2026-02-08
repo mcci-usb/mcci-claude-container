@@ -46,7 +46,16 @@ RUN apt-get update
 RUN apt-get -y dist-upgrade
 RUN apt-get -y --no-install-recommends install \
     make \
-    curl \
+    ca-certificates \
+    gnupg \
+    curl
+
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+RUN apt-get update && apt-get install -y nodejs
+
+RUN apt-get -y --no-install-recommends install \
     git \
     openssh-client \
     sudo \
@@ -60,10 +69,6 @@ RUN apt-get -y --no-install-recommends install \
 #RUN apt-get -y --no-install-recommends install \
 #    build-essential \
 #    gcc-multilib
-
-# set up node.js 20 (as root)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
 
 # Copy the firewall script
 COPY init-firewall.sh /usr/local/bin/init-firewall.sh
