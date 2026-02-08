@@ -68,7 +68,7 @@ PROJECT_MOUNTS :=	\
 		--volume "${PROJECT_CONTEXT}/.bash_aliases:/home/${BUILD_UNAME}/.bash_aliases:ro" \
 		--volume "${PROJECT_CONTEXT}/.bash_history:/home/${BUILD_UNAME}/.bash_history" \
 		--volume "${PROJECT_CONTEXT}/.claude.json:/home/${BUILD_UNAME}/.claude.json" \
-		--volume "${CURDIR}/init-firewall-extra.txt:/usr/local/etc/init-firewall-extra.txt:ro" \
+		--volume "${CURDIR}/init-firewall-extra-domains.conf:/usr/local/etc/init-firewall-extra-domains.conf:ro" \
 # end PROJECT_MOUNTS
 
 # if we don't set up the files that we're mounting in, Docker will
@@ -96,9 +96,9 @@ run-setup:
 		printf "\n" "initalize empty .claude.json" && \
 		touch "${PROJECT_CONTEXT}/.claude.json" ; \
 	fi
-	@if [[ ! -f "${CURDIR}/init-firewall-extra.txt" ]] ; then \
-		printf "\n" "initalize empty init-firewall-extra.txt" && \
-		touch "${CURDIR}/init-firewall-extra.txt" ; \
+	@if [[ ! -f "${CURDIR}/init-firewall-extra-domains.conf" ]] ; then \
+		printf "\n" "initalize empty init-firewall-extra-domains.conf" && \
+		touch "${CURDIR}/init-firewall-extra-domains.conf" ; \
 	fi
 
 run:	run-setup

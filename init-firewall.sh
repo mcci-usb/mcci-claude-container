@@ -74,7 +74,7 @@ DOMAINS=(
     "update.code.visualstudio.com"
     )
 
-EXTRA_DOMAIN_FILE=/usr/local/etc/init-firewall-extra.txt
+EXTRA_DOMAIN_FILE=/usr/local/etc/init-firewall-extra-domains.conf
 if [[ -f "${EXTRA_DOMAIN_FILE}" ]]; then
     echo "Adding domains from ${EXTRA_DOMAIN_FILE}"
     while IFS='' read -r line; do
