@@ -80,24 +80,24 @@ run-setup:
 	@mkdir -p "${PROJECT_CONTEXT}/.claude" "${PROJECT_CONTEXT}/.cache"
 	@if [[ ! -f "${PROJECT_CONTEXT}/.bashrc" ]] && \
 	    [[ -f "${HOME}/.bashrc" ]]; then \
-			printf "\n" "initalize .bashrc" && \
+			printf "%s\n" "initalize .bashrc" && \
 			cp "${HOME}/.bashrc" "${PROJECT_CONTEXT}/.bashrc" ; \
 	fi
 	@if [[ ! -f "${PROJECT_CONTEXT}/.bash_aliases" ]] && \
 	    [[ -f "${HOME}/.bash_aliases" ]] ; then \
-		printf "\n" "initalize .bash_aliases" && \
+		printf "%s\n" "initalize .bash_aliases" && \
 		cp "${HOME}/.bash_aliases" "${PROJECT_CONTEXT}/.bash_aliases" ; \
 	fi
 	@if [[ ! -f "${PROJECT_CONTEXT}/.bash_history" ]] ; then \
-		printf "\n" "initalize empty .bash_history" && \
+		printf "%s\n" "initalize empty .bash_history" && \
 		touch "${PROJECT_CONTEXT}/.bash_history" ; \
 	fi
 	@if [[ ! -f "${PROJECT_CONTEXT}/.claude.json" ]] ; then \
-		printf "\n" "initalize empty .claude.json" && \
+		printf "%s\n" "initalize empty .claude.json" && \
 		touch "${PROJECT_CONTEXT}/.claude.json" ; \
 	fi
 	@if [[ ! -f "${CURDIR}/init-firewall-extra-domains.conf" ]] ; then \
-		printf "\n" "initalize empty init-firewall-extra-domains.conf" && \
+		printf "%s\n" "initalize empty init-firewall-extra-domains.conf" && \
 		touch "${CURDIR}/init-firewall-extra-domains.conf" ; \
 	fi
 
