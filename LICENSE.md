@@ -26,4 +26,3 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 **Note:** `init-firewall.sh` is derived from Anthropic's claude-code project and
 is subject to different license terms. See [LICENSE-init-firewall.md](LICENSE-init-firewall.md).
-
