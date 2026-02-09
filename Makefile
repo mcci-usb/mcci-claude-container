@@ -42,6 +42,7 @@ $(message BUILD_UID: ${BUILD_UID})
 BUILD_GECOS ?= $(shell grep '^${LOGNAME}:' /etc/passwd | cut -d: -f5 | cut -d, -f1)
 BUILD_GID ?= $(shell grep '^${LOGNAME}:' /etc/passwd | cut -d: -f4)
 BUILD_GNAME ?= $(shell getent group ${BUILD_GID} | cut -d: -f1)
+BUILD_USER_EMAIL ?= $(shell git config --global user.email)
 
 build:	Dockerfile
 	cd $(dir Dockerfile)
@@ -55,6 +56,7 @@ build:	Dockerfile
 		--build-arg GROUP_ID=${BUILD_GID} \
 		--build-arg GROUP_NAME=${BUILD_GNAME} \
 		--build-arg USER_GECOS="${BUILD_GECOS}" \
+		--build-arg USER_EMAIL="${BUILD_USER_EMAIL}" \
 		-f Dockerfile \
 		.
 

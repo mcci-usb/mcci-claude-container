@@ -72,12 +72,13 @@ COPY init-firewall.sh /usr/local/bin/init-firewall.sh
 COPY read-bashrc-init-firewall.sh /usr/local/bin/read-bashrc-init-firewall.sh
 RUN chmod +x /usr/local/bin/init-firewall.sh /usr/local/bin/read-bashrc-init-firewall.sh
 
-# set up user ids; normally overriden
+# set up user ids; normally overriden by the Makefile.
 ARG USER_ID=1000
 ARG GROUP_ID=1000
-ARG USER_NAME=mcci
-ARG GROUP_NAME=mcci
-ARG USER_GECOS="MCCI Corporation"
+ARG USER_NAME=claude-user
+ARG GROUP_NAME=example
+ARG USER_GECOS="Example Corporation"
+ARG USER_EMAIL="claude-user@example.com"
 
 # create a guest user with given UID and GID.
 RUN if id -u ${USER_NAME} > /dev/null 2>&1 ; then userdel -f ${USER_NAME} ; fi && \
@@ -103,7 +104,7 @@ RUN mkdir -m 700 .ssh && \
     printf "StrictHostKeyChecking no\n" > .ssh/config
 
 # configure git, just in case.
-RUN git config --global user.email "$USER_NAME@mcci.com" && \
+RUN git config --global user.email "$USER_EMAIL" && \
     git config --global user.name "$USER_GECOS"
 
 # install claude
