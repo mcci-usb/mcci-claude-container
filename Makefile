@@ -26,6 +26,7 @@
 #
 ##############################################################################
 
+# use bash for convenience
 SHELL := /bin/bash
 
 # Directory containing this Makefile
