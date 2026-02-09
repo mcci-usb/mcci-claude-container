@@ -79,6 +79,11 @@ PROJECT_MOUNTS :=	\
 # create a directory. And if we don't create .claude in the
 # context, the created directory will have the wrong permissions.
 run-setup:
+	@if ! docker image inspect ${MCCI_CLAUDE_CONTAINER_LOCAL_TAG} >/dev/null 2>&1; then \
+		echo "ERROR: Image '${MCCI_CLAUDE_CONTAINER_LOCAL_TAG}' not found."; \
+		echo "Run 'make build' first (from the mcci-claude-container directory)."; \
+		exit 1; \
+	fi
 	@mkdir -p "${PROJECT_CONTEXT}"
 	@mkdir -p "${PROJECT_WORKSPACE}"
 	@mkdir -p "${PROJECT_CONTEXT}/.claude" "${PROJECT_CONTEXT}/.cache"
